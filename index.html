@@ -235,6 +235,37 @@ machine.jackpot .reel-symbol{
   .details{grid-template-columns:1fr}
   .story{padding-top:80px}
 }
+
+/* Repair / personal quiz */
+.repair-panel{width:min(920px,100%);margin:0 auto;padding:28px 18px 60px;text-align:center;animation:repairIn .6s ease both}
+@keyframes repairIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.repair-kicker{font-size:9px;letter-spacing:5px;color:#888;text-transform:uppercase;margin-bottom:12px}
+.repair-title{font-family:Georgia,serif;font-size:clamp(34px,7vw,62px);font-weight:400;margin:0 0 12px}
+.repair-sub{color:#999;line-height:1.7;font-size:13px;max-width:620px;margin:0 auto 28px}
+.memory-lights{display:flex;justify-content:center;gap:12px;margin:26px auto 20px}
+.memory-dot{width:66px;height:66px;border-radius:14px;border:1px solid rgba(255,255,255,.13);background:#111;display:grid;place-items:center;font-size:25px;cursor:pointer;transition:.18s;box-shadow:inset 0 0 20px rgba(255,255,255,.025)}
+.memory-dot.active{background:#f4bd42;color:#111;box-shadow:0 0 35px rgba(244,189,66,.42);transform:scale(1.08)}
+.memory-dot.wrong{animation:shake .35s ease}
+@keyframes shake{25%{transform:translateX(-7px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
+.repair-status{min-height:20px;color:#aaa;font-size:10px;letter-spacing:3px;text-transform:uppercase;margin:18px 0}
+.quiz-card{max-width:700px;margin:0 auto;border:1px solid rgba(255,255,255,.1);border-radius:22px;padding:28px 20px;background:rgba(255,255,255,.025);box-shadow:0 25px 70px rgba(0,0,0,.25)}
+.quiz-count{font-size:9px;letter-spacing:4px;color:#777;text-transform:uppercase;margin-bottom:18px}
+.quiz-question{font-family:Georgia,serif;font-size:clamp(23px,4.5vw,37px);line-height:1.15;margin-bottom:24px}
+.quiz-options{display:grid;gap:10px}
+.quiz-option{appearance:none;border:1px solid rgba(255,255,255,.12);background:#0d0d10;color:#eee;border-radius:12px;padding:15px 16px;text-align:left;font:inherit;cursor:pointer;transition:.18s}
+.quiz-option:hover{border-color:rgba(244,189,66,.6);transform:translateY(-1px)}
+.quiz-option.correct{border-color:#8ee69b;background:rgba(82,180,95,.12)}
+.quiz-option.wrong{border-color:#e77b7b;background:rgba(180,55,55,.1)}
+.quiz-feedback{height:24px;margin-top:16px;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#aaa}
+.wires{max-width:700px;margin:0 auto}
+.wire-board{position:relative;display:flex;justify-content:space-between;align-items:center;padding:34px 28px;border:1px solid rgba(255,255,255,.1);border-radius:22px;background:linear-gradient(90deg,rgba(244,189,66,.025),rgba(255,255,255,.015),rgba(244,189,66,.025));min-height:210px;overflow:hidden}
+.wire-side{display:flex;flex-direction:column;gap:16px}.wire-terminal{width:62px;height:42px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:#101014;cursor:pointer;position:relative;z-index:2;font-size:10px;letter-spacing:2px}.wire-terminal.lit{box-shadow:0 0 28px rgba(244,189,66,.5);border-color:#f4bd42;color:#f4bd42}
+.wire-line{position:absolute;left:90px;right:90px;height:2px;background:rgba(255,255,255,.06);top:50%;transform:translateY(-50%)}
+.wire-line.connected{background:#f4bd42;box-shadow:0 0 18px rgba(244,189,66,.6);animation:wirePulse .7s ease}
+@keyframes wirePulse{50%{transform:translateY(-50%) scaleY(5);opacity:.8}}
+.repair-complete{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:#f4bd42;margin-top:22px;min-height:18px}
+@media(max-width:720px){.wire-board{padding:25px 14px}.wire-line{left:65px;right:65px}.wire-terminal{width:52px}}
+
 </style>
 </head>
 <body class="lock">
@@ -276,6 +307,55 @@ machine.jackpot .reel-symbol{
         <div class="near-win" id="nearWin"></div>
       </div>
       <div class="lever"></div>
+    </div>
+
+
+    <div class="repair-panel hidden" id="repairPanel">
+      <div id="memoryStage">
+        <div class="repair-kicker">MANUAL REPAIR · 01</div>
+        <h2 class="repair-title">The machine broke.</h2>
+        <p class="repair-sub">Apparently, the jackpot cannot continue on its own. Remember the sequence and restore the first connection.</p>
+        <div class="memory-lights" id="memoryLights">
+          <button class="memory-dot" data-i="0">●</button>
+          <button class="memory-dot" data-i="1">●</button>
+          <button class="memory-dot" data-i="2">●</button>
+        </div>
+        <div class="repair-status" id="memoryStatus">WATCH THE SEQUENCE</div>
+      </div>
+
+      <div id="quizStage" class="hidden">
+        <div class="repair-kicker">MANUAL REPAIR · 02</div>
+        <h2 class="repair-title">Personal verification.</h2>
+        <p class="repair-sub">Before the system can restart, prove that you actually know us.</p>
+        <div class="quiz-card">
+          <div class="quiz-count" id="quizCount"></div>
+          <div class="quiz-question" id="quizQuestion"></div>
+          <div class="quiz-options" id="quizOptions"></div>
+          <div class="quiz-feedback" id="quizFeedback"></div>
+        </div>
+      </div>
+
+      <div id="wireStage" class="hidden">
+        <div class="repair-kicker">MANUAL REPAIR · 03</div>
+        <h2 class="repair-title">Reconnect the system.</h2>
+        <p class="repair-sub">One last thing. Connect the terminals in the correct order.</p>
+        <div class="wires">
+          <div class="wire-board">
+            <div class="wire-side">
+              <button class="wire-terminal" data-i="0">A</button>
+              <button class="wire-terminal" data-i="1">B</button>
+              <button class="wire-terminal" data-i="2">C</button>
+            </div>
+            <div class="wire-line" id="wireLine"></div>
+            <div class="wire-side">
+              <button class="wire-terminal" data-i="0">A</button>
+              <button class="wire-terminal" data-i="1">B</button>
+              <button class="wire-terminal" data-i="2">C</button>
+            </div>
+          </div>
+          <div class="repair-complete" id="wireStatus">WAITING FOR CONNECTION</div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -381,6 +461,18 @@ const jackSymbols = [...document.querySelectorAll(".jack-symbol")];
 const jackBurst = document.getElementById("jackBurst");
 const jackpotText = document.getElementById("jackpotText");
 const reels = [0,1,2].map(i=>document.getElementById("reel"+i));
+const repairPanel = document.getElementById("repairPanel");
+const memoryStage = document.getElementById("memoryStage");
+const quizStage = document.getElementById("quizStage");
+const wireStage = document.getElementById("wireStage");
+const memoryDots = [...document.querySelectorAll(".memory-dot")];
+const memoryStatus = document.getElementById("memoryStatus");
+const quizCount = document.getElementById("quizCount");
+const quizQuestion = document.getElementById("quizQuestion");
+const quizOptions = document.getElementById("quizOptions");
+const quizFeedback = document.getElementById("quizFeedback");
+const wireLine = document.getElementById("wireLine");
+const wireStatus = document.getElementById("wireStatus");
 
 let spins = 0;
 let spinning = false;
@@ -540,6 +632,149 @@ function finalSpin(){
     setTimeout(() => triggerMysteryJackpot(), 1800);
   }, 3500);
 }
+const questions = [
+  {q:"Kde jsme se poprvé viděli?", a:["Vaňkovka","Futurum","Ve městě"], c:0},
+  {q:"Jak se správně říká Lili?", a:["Lili","Kittycat","Griliáš"], c:2},
+  {q:"Jaká byla naše první společná dovolená?", a:["Řecko","Tunis","Slovensko"], c:0},
+  {q:"Jakou značku mobilu máme?", a:["Apple","Android","Epf"], c:2},
+  {q:"Jaké chceme pyžámko?", a:["Hello Kitty","Monster High","Doodle Bob"], c:2},
+  {q:"Kdo z nás udělal první krok?", a:["Já (Nikolka)","Ty","Oba zároveň"], c:0},
+  {q:"Kde bydlím?", a:["Hodonínská","Honzova","Hněvkovského"], c:0},
+  {q:"Jak moc se chceš se mnou odstěhovat?", a:["0 %","100 %","10000000000 %"], c:2},
+  {q:"Jak se správně jmenuje ulice ve Slatině?", a:["Olomoucká","Džípšská","Řípská"], c:1},
+  {q:"Jak se jmenuje duch, který se nás bojí?", a:["Dildo","Shade","Fantom"], c:1}
+];
+let memorySequence=[];
+let memoryInput=[];
+let quizIndex=0;
+let wireInput=[];
+
+function showRepair(){
+  machine.classList.add("hidden");
+  repairPanel.classList.remove("hidden");
+  repairPanel.scrollIntoView({behavior:"smooth",block:"center"});
+  startMemoryGame();
+}
+function flashMemory(i){
+  const d=memoryDots[i];
+  d.classList.add("active");
+  tone(420+i*140,.14,"sine",.04);
+  setTimeout(()=>d.classList.remove("active"),260);
+}
+function startMemoryGame(){
+  memorySequence=[Math.floor(Math.random()*3),Math.floor(Math.random()*3),Math.floor(Math.random()*3)];
+  memoryInput=[];
+  memoryStatus.textContent="WATCH THE SEQUENCE";
+  setTimeout(()=>{
+    memorySequence.forEach((v,i)=>setTimeout(()=>flashMemory(v),i*520));
+    setTimeout(()=>memoryStatus.textContent="NOW REPEAT IT",memorySequence.length*520+350);
+  },450);
+}
+memoryDots.forEach(dot=>dot.addEventListener("click",()=>{
+  const i=Number(dot.dataset.i);
+  if(memoryInput.length>=memorySequence.length)return;
+  memoryInput.push(i);
+  flashMemory(i);
+  const pos=memoryInput.length-1;
+  if(i!==memorySequence[pos]){
+    memoryStatus.textContent="WRONG SEQUENCE · TRY AGAIN";
+    dot.classList.add("wrong");
+    setTimeout(()=>dot.classList.remove("wrong"),400);
+    memoryInput=[];
+    setTimeout(startMemoryGame,700);
+    return;
+  }
+  if(memoryInput.length===memorySequence.length){
+    memoryStatus.textContent="CONNECTION 01 RESTORED ✓";
+    tone(660,.16,"triangle",.05);tone(990,.22,"sine",.04,.1);
+    setTimeout(()=>{
+      memoryStage.classList.add("hidden");
+      quizStage.classList.remove("hidden");
+      quizIndex=0;
+      renderQuestion();
+    },900);
+  }
+}));
+function renderQuestion(){
+  const q=questions[quizIndex];
+  quizCount.textContent=`QUESTION ${quizIndex+1} / ${questions.length}`;
+  quizQuestion.textContent=q.q;
+  quizFeedback.textContent="";
+  quizOptions.innerHTML="";
+  q.a.forEach((answer,i)=>{
+    const b=document.createElement("button");
+    b.className="quiz-option";
+    b.textContent=answer;
+    b.addEventListener("click",()=>answerQuestion(i,b));
+    quizOptions.appendChild(b);
+  });
+}
+function answerQuestion(i,btn){
+  const q=questions[quizIndex];
+  if(i===q.c){
+    btn.classList.add("correct");
+    quizFeedback.textContent="CORRECT ✓";
+    tone(720,.12,"triangle",.045);tone(980,.16,"sine",.035,.08);
+    [...quizOptions.children].forEach(b=>b.disabled=true);
+    setTimeout(()=>{
+      quizIndex++;
+      if(quizIndex<questions.length) renderQuestion();
+      else finishQuiz();
+    },650);
+  }else{
+    btn.classList.add("wrong");
+    quizFeedback.textContent=quizIndex===7 ? "TOHLE VÁŽNĚ? 😭" : "ARE YOU SURE? 👀";
+    tone(180,.15,"square",.035);
+    setTimeout(()=>btn.classList.remove("wrong"),350);
+  }
+}
+function finishQuiz(){
+  quizCount.textContent="10 / 10";
+  quizQuestion.textContent="PERSONAL CONNECTION VERIFIED ❤️";
+  quizOptions.innerHTML="";
+  quizFeedback.textContent="THE SYSTEM KNOWS YOU TWO ARE A MATCH";
+  tone(523,.2,"sine",.04);tone(659,.2,"sine",.04,.12);tone(784,.35,"triangle",.05,.24);
+  setTimeout(()=>{
+    quizStage.classList.add("hidden");
+    wireStage.classList.remove("hidden");
+    startWireGame();
+  },1100);
+}
+function startWireGame(){
+  wireInput=[];
+  wireLine.classList.remove("connected");
+  wireStatus.textContent="CONNECT IN ORDER: A → C → B";
+}
+const wireButtons=[...document.querySelectorAll(".wire-terminal")];
+wireButtons.forEach(btn=>btn.addEventListener("click",()=>{
+  const i=Number(btn.dataset.i);
+  const target=[0,2,1][wireInput.length];
+  if(i!==target){
+    wireStatus.textContent="WRONG CONNECTION · TRY AGAIN";
+    btn.classList.add("lit");setTimeout(()=>btn.classList.remove("lit"),250);
+    wireInput=[];wireLine.classList.remove("connected");
+    setTimeout(startWireGame,600);
+    return;
+  }
+  wireInput.push(i);
+  btn.classList.add("lit");
+  tone(440+i*180,.15,"triangle",.04);
+  if(wireInput.length===3){
+    wireLine.classList.add("connected");
+    wireStatus.textContent="SYSTEM REPAIRED ✓";
+    tone(660,.15,"sine",.05);tone(990,.22,"sine",.05,.12);
+    setTimeout(()=>completeRepair(),1100);
+  }
+}));
+function completeRepair(){
+  repairPanel.classList.add("hidden");
+  machine.classList.remove("hidden");
+  nearWin.classList.remove("show");
+  statusEl.textContent="FINAL SPIN READY";
+  spinBtn.disabled=false;
+  spinBtn.innerHTML="<span>FINAL SPIN</span>";
+  machine.scrollIntoView({behavior:"smooth",block:"center"});
+}
 function spin(){
   if(spinning) return;
   spinning=true;
@@ -549,7 +784,16 @@ function spin(){
   statusEl.textContent="GOOD LUCK";
   spins++;
 
-  if(spins>=10){
+  if(spins===9){
+    normalSpin();
+    setTimeout(()=>{
+      spinning=false;
+      spinBtn.disabled=true;
+      statusEl.textContent="SYSTEM FAILURE";
+      tone(110,.25,"sawtooth",.055);tone(75,.3,"square",.035,.2);
+      setTimeout(showRepair,850);
+    },1900);
+  }else if(spins>=10){
     finalSpin();
   }else{
     normalSpin();
@@ -647,7 +891,7 @@ document.querySelectorAll(".story .photo,.story .moment-card,.story .reveal-bloc
 
 // Keyboard support
 document.addEventListener("keydown",e=>{
-  if(e.code==="Space" && !casino.classList.contains("hidden")){
+  if(e.code==="Space" && !casino.classList.contains("hidden") && repairPanel.classList.contains("hidden")){
     e.preventDefault(); spin();
   }
 });
