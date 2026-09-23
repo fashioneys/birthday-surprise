@@ -71,6 +71,26 @@ button{font:inherit}
 .reel.spinning .reel-symbol{animation:blur .09s linear infinite}
 @keyframes blur{0%{transform:translateY(-18px);filter:blur(2px)}50%{transform:translateY(18px);filter:blur(4px)}100%{transform:translateY(-18px);filter:blur(2px)}}
 .payline{height:2px;background:linear-gradient(90deg,transparent,#d7b15a,transparent);margin:12px 0;opacity:.8}
+
+.casino-intro{
+  position:absolute;z-index:20;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;background:radial-gradient(circle at center,rgba(20,20,25,.88),rgba(3,3,5,.98) 70%);
+  border-radius:30px;transition:opacity .65s ease,visibility .65s ease;
+}
+.casino-intro.hide{opacity:0;visibility:hidden;pointer-events:none}
+.casino-intro-small{font-size:10px;letter-spacing:6px;color:#aaa;margin-bottom:15px}
+.casino-intro-title{font-family:Georgia,serif;font-size:clamp(38px,7vw,66px);letter-spacing:6px;margin-bottom:30px;text-shadow:0 0 35px rgba(255,195,70,.18)}
+.coin-btn{
+  width:180px;height:58px;border:1px solid #8b8b90;border-radius:999px;color:#111;background:linear-gradient(#f6d77b,#b98425);
+  box-shadow:0 0 25px rgba(245,195,75,.22),inset 0 2px #fff9;cursor:pointer;font-weight:900;letter-spacing:2px;
+  display:flex;align-items:center;justify-content:center;gap:15px;transition:.2s;
+}
+.coin-btn:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(245,195,75,.35),inset 0 2px #fff9}
+.coin-btn b{font-size:17px;color:#fff4b0}
+.casino-intro-hint{margin-top:15px;font-size:9px;letter-spacing:3px;color:#666;text-transform:uppercase}
+.near-win{height:20px;margin-top:6px;color:#e7c76b;font-size:9px;letter-spacing:4px;text-transform:uppercase;opacity:0;transition:.25s}
+.near-win.show{opacity:1;animation:nearPulse .7s ease-in-out}
+@keyframes nearPulse{50%{transform:scale(1.08);text-shadow:0 0 20px rgba(255,205,80,.7)}}
 .machine-bottom{text-align:center;margin-top:22px}
 .spin-btn{
   width:120px;height:58px;border-radius:50%;border:3px solid #8d8d93;background:radial-gradient(circle at 35% 25%,#fff,#d6d6d9 22%,#67676d 55%,#242428 100%);
@@ -168,6 +188,15 @@ machine.jackpot .reel-symbol{
 .story-head .eyebrow{color:#a9a9af}
 .story-head h3{font-family:Georgia,serif;font-weight:400;font-size:clamp(38px,7vw,70px);margin:0 0 20px}
 .story-head p{max-width:650px;margin:auto;color:#a7a7ad;line-height:1.8;font-size:15px}
+
+.moment-card{
+  margin:0 auto 70px;max-width:850px;text-align:center;padding:58px 28px;
+  border-top:1px solid rgba(255,255,255,.1);border-bottom:1px solid rgba(255,255,255,.1);
+  background:radial-gradient(circle at center,rgba(255,195,70,.06),transparent 60%);
+}
+.moment-eyebrow{font-size:9px;letter-spacing:5px;color:#8d8d95;margin-bottom:16px}
+.moment-title{font-family:Georgia,serif;font-size:clamp(28px,5vw,48px)}
+.moment-sub{margin-top:12px;color:#888;font-size:13px}
 .gallery{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}
 .photo{position:relative;overflow:hidden;border-radius:22px;background:#111;min-height:360px;box-shadow:0 25px 60px rgba(0,0,0,.4)}
 .photo img{width:100%;height:100%;display:block;object-fit:cover;transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
@@ -188,6 +217,8 @@ machine.jackpot .reel-symbol{
 .message small{display:block;margin-top:28px;color:#777;letter-spacing:3px;text-transform:uppercase;font-size:9px}
 .footer{text-align:center;color:#555;font-size:9px;letter-spacing:3px;text-transform:uppercase;padding:0 20px 50px}
 
+.reveal-block,.moment-card,.photo{opacity:0;transform:translateY(28px);transition:opacity .8s ease,transform .8s ease}
+.reveal-block.visible,.moment-card.visible,.photo.visible{opacity:1;transform:translateY(0)}
 /* responsive */
 @media(max-width:720px){
   .screen{padding:15px}
@@ -222,6 +253,12 @@ machine.jackpot .reel-symbol{
 <section id="casino" class="screen hidden">
   <div class="bg-glow"></div><div class="noise"></div>
   <div class="casino-wrap">
+    <div class="casino-intro" id="casinoIntro">
+      <div class="casino-intro-small">WELCOME, PLAYER</div>
+      <div class="casino-intro-title">ROYAL JACKPOT</div>
+      <button class="coin-btn" id="coinBtn"><span>INSERT COIN</span><b>●</b></button>
+      <div class="casino-intro-hint">tap to activate</div>
+    </div>
     <div class="machine" id="machine">
       <div class="jackpot-lights" id="lights"></div>
       <div class="topbar"><span class="brand-dot"></span><div class="brand">ROYAL JACKPOT</div><span class="brand-dot"></span></div>
@@ -236,6 +273,7 @@ machine.jackpot .reel-symbol{
       <div class="machine-bottom">
         <button class="spin-btn" id="spinBtn"><span>SPIN</span></button>
         <div class="status" id="status">READY</div>
+        <div class="near-win" id="nearWin"></div>
       </div>
       <div class="lever"></div>
     </div>
@@ -245,10 +283,10 @@ machine.jackpot .reel-symbol{
 <section id="reveal" class="hidden">
   <div class="reveal-hero">
     <div class="reveal-content">
-      <div class="mini">THE JACKPOT IS YOURS</div>
+      <div class="mini">YOUR JACKPOT HAS BEEN UNLOCKED</div>
       <h2>RAKOUSKO</h2>
-      <div class="country">🇦🇹 26. 9. — 27. 9. 🇦🇹</div>
-      <div class="date">A TEĎ UŽ JEN SBALIT VĚCI.</div>
+      <div class="country">🇦🇹</div>
+      <div class="date">26. 9. — 27. 9. 2026</div>
     </div>
     <div class="scroll-hint">scroll down ↓</div>
   </div>
@@ -258,12 +296,19 @@ machine.jackpot .reel-symbol{
       <div class="eyebrow">OUR LITTLE ESCAPE</div>
       <h3>Tak jo. Jedeme.</h3>
       <p>
-        Žádný další notebook, žádný koncert. Tentokrát nás čeká Rakousko,
-        relax, vířivka, champagne a hlavně jeden den jen pro nás.
+        Žádný další notebook, žádný koncert. Tentokrát nás čeká Rakousko.
+        A hlavně jeden den jen pro nás.
       </p>
     </div>
 
-    <div class="gallery">
+    
+    <div class="moment-card">
+      <div class="moment-eyebrow">24 HOURS · JUST US</div>
+      <div class="moment-title">Relax. Vířivka. Champagne.</div>
+      <div class="moment-sub">A na chvíli vypnout úplně všechno ostatní.</div>
+    </div>
+
+<div class="gallery">
       <div class="photo big">
         <img src="photo1.png" alt="Vířivka">
         <div class="photo-caption">Private jacuzzi</div>
@@ -282,13 +327,13 @@ machine.jackpot .reel-symbol{
       </div>
     </div>
 
-    <div class="details">
+    <div class="details reveal-block">
       <div class="detail"><div class="icon">📅</div><b>Kdy</b><span>26. 9. — 27. 9. 2026</span></div>
       <div class="detail"><div class="icon">🛁</div><b>Co nás čeká</b><span>Soukromá vířivka, relax a čas jen pro nás.</span></div>
       <div class="detail"><div class="icon">🥂</div><b>Dress code</b><span>Pohoda. A pokud možno žádné pracovní myšlenky.</span></div>
     </div>
 
-    <div class="message">
+    <div class="message reveal-block">
       <div class="heart">❤️</div>
       <p>Všechno nejlepší, bejby! ❤️</p>
       <small>Pro tebe</small>
@@ -324,7 +369,10 @@ const intro = document.getElementById("intro");
 const casino = document.getElementById("casino");
 const reveal = document.getElementById("reveal");
 const startBtn = document.getElementById("startBtn");
+const casinoIntro = document.getElementById("casinoIntro");
+const coinBtn = document.getElementById("coinBtn");
 const spinBtn = document.getElementById("spinBtn");
+const nearWin = document.getElementById("nearWin");
 const statusEl = document.getElementById("status");
 const machine = document.getElementById("machine");
 const lights = document.getElementById("lights");
@@ -353,9 +401,15 @@ function tone(freq,dur,type="sine",vol=.035,delay=0){
   o.connect(g);g.connect(audioCtx.destination);
   o.start(audioCtx.currentTime+delay);o.stop(audioCtx.currentTime+delay+dur+.03);
 }
+function coinSound(){
+  tone(740,.08,"triangle",.055);
+  tone(1047,.18,"sine",.045,.07);
+  tone(1568,.28,"sine",.035,.17);
+}
 function spinSound(){
-  tone(95,.16,"sawtooth",.045);
-  tone(140,.12,"square",.025,.08);
+  tone(75,.20,"sawtooth",.05);
+  tone(115,.16,"square",.028,.08);
+  tone(175,.12,"sawtooth",.022,.16);
 }
 function tick(){tone(740,.035,"square",.018)}
 function stopSound(){tone(180,.08,"triangle",.04);tone(430,.13,"sine",.03,.03)}
@@ -367,6 +421,16 @@ function jackpotSound(){
   [1047,1319,1568].forEach((f,i)=>tone(f,.8,"triangle",.05,.8+i*.12));
 }
 function shuffleDistinct(){
+  // Normal spins never produce three of a kind.
+  // Occasionally produce a "SO CLOSE..." near-win with exactly two matching.
+  if(Math.random() < 0.28){
+    const winner = symbols[Math.floor(Math.random()*symbols.length)];
+    const other = symbols.filter(s => s !== winner)[Math.floor(Math.random()*2)];
+    const result = Math.random() < .5
+      ? [winner, winner, other]
+      : [winner, other, winner];
+    return result;
+  }
   return symbols.slice().sort(()=>Math.random()-.5);
 }
 function setReel(i,s){
@@ -422,11 +486,22 @@ function stopReel(i,s,delay){
   },delay);
 }
 function normalSpin(){
+  nearWin.classList.remove("show");
   const result=shuffleDistinct();
   [0,1,2].forEach((i)=>startReel(i,1150+i*170));
   stopReel(0,result[0],1150);
   stopReel(1,result[1],1370);
   stopReel(2,result[2],1590);
+
+  const near = result[0].emoji === result[1].emoji || result[0].emoji === result[2].emoji || result[1].emoji === result[2].emoji;
+  if(near){
+    setTimeout(()=>{
+      nearWin.textContent = "SO CLOSE...";
+      nearWin.classList.add("show");
+      tone(310,.18,"triangle",.035);
+      tone(520,.20,"triangle",.03,.16);
+    },1660);
+  }
 }
 function finalSpin(){
   // CINEMATIC FINAL SPIN
@@ -544,7 +619,31 @@ startBtn.addEventListener("click",()=>{
   casino.classList.remove("hidden");
   window.scrollTo({top:0,behavior:"instant"});
 });
+
+coinBtn.addEventListener("click",()=>{
+  audio();
+  coinSound();
+  coinBtn.disabled = true;
+  coinBtn.innerHTML = "<span>READY</span><b>✓</b>";
+  setTimeout(()=>{
+    casinoIntro.classList.add("hide");
+    statusEl.textContent = "READY";
+    spinBtn.focus();
+  },700);
+});
+
 spinBtn.addEventListener("click",spin);
+
+// Scroll reveal for the vacation details.
+const revealObserver = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add("visible");
+      revealObserver.unobserve(entry.target);
+    }
+  });
+},{threshold:.14});
+document.querySelectorAll(".story .photo,.story .moment-card,.story .reveal-block").forEach(el=>revealObserver.observe(el));
 
 // Keyboard support
 document.addEventListener("keydown",e=>{
